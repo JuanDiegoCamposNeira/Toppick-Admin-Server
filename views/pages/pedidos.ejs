@@ -110,6 +110,7 @@ let currentOrder;
 // Function to update the inventory of ONE order
 const updateOrderInventory = async ( idPedido ) => {
 
+    console.log('---------------  Update inventory  ---------------'); 
 
     const pedido = activeOrders[idPedido]; 
     console.log('CurrentOrder : ', pedido); 
