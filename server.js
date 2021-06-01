@@ -13,7 +13,7 @@ require('./Passport.js');
 //------------------------------------------------------- 
 //configuracion de los valores staticos
 app.use(express.static(path.join(__dirname, 'public'))); 
-app.set('views', __dirname + '/views');
+app.set('views', __dirname + 'views');
 app.set('view engie', 'ejs');
 
 const PORT = process.env.PORT || 8080; // Port in which the server will be listening to requests
