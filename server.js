@@ -59,8 +59,24 @@ const getDate = () => {
 //                  LOGOUT route
 //-------------------------------------------------------
 app.post('/logout', async (req, res) => {
-    req.logout(); 
-    res.redirect('/'); 
+     
+    // Change availavility of store in DB
+    try {
+        const url = `https://toppickapp.herokuapp.com/cierreTienda/${ req.user.id }`; 
+        console.log('LOGOUT URL:', url); 
+        const response = await axios.get( url ); 
+        console.log('LOGOUT server response:', response); 
+    } catch ( error ) {
+        console.log('ERROR:', error); 
+        // Return error redirect 
+        return res.redirect('/'); 
+    }
+    
+    // Log out from store
+    req.logout();
+    // Return successfull redirect 
+    return res.redirect('/'); 
+
 }); 
 
 //-------------------------------------------------------
@@ -70,7 +86,7 @@ app.get('/', isStoreAlreadyLoggedIn, (req, res) => {
     res.render('pages/inicio.ejs');
 });
 
-app.post('/login', (req, res, next) => { 
+app.post('/login', async (req, res, next) => { 
     passport.authenticate('local-login', (err, user, info) => {
         // If an error occurs
         if (err) return res.redirect('/'); 
@@ -79,9 +95,25 @@ app.post('/login', (req, res, next) => {
         if (!user) return res.redirect('/'); 
 
         // If user exists in the DB
-        req.logIn(user, (err) => {
+        req.logIn(user, async (err) => {
+            // Error while loggin in
             if (err) return next(err); 
-            else return res.redirect(`/pedidos`)
+            // No error 
+            else {
+                // Change store state in DB  
+                try {
+                    const url = `https://toppickapp.herokuapp.com/AperturaTienda/${ req.user.id }`; 
+                    console.log('LOGIN URL', url); 
+                    const response = await axios.get( url ); 
+                    console.log('LOGIN server response :', response); 
+                    // Return succsessfull redirect 
+                    return res.redirect(`/pedidos`); 
+                } catch (error) {
+                    // Return error redirect
+                    return res.redirect('/'); 
+                }
+
+            } 
         }); 
     }) (req, res, next); 
 }); 
