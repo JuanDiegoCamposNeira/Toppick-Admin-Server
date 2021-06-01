@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const session = require("express-session");
 const PassportLocal = require('passport-local').Strategy;
 const app = express();
+const path = require('path'); 
 require('./Passport.js'); 
 
 //-------------------------------------------------------
@@ -12,9 +13,9 @@ require('./Passport.js');
 //------------------------------------------------------- 
 //configuracion de los valores staticos
 app.set('view engie', 'ejs');
-app.use("/assets", express.static("assets"));
-app.use("/Scripts", express.static("Scripts"));
-app.use("/Css", express.static("Css"));
+app.use("/assets", express.static( path.join( __dirname, 'assets' ) ));
+app.use("/Scripts", express.static( path.join( __dirname, 'Scripts' ) ));
+app.use("/Css", express.static( path.join( __dirname, 'Css' ) ));
 
 const PORT = process.env.PORT || 8080; // Port in which the server will be listening to requests
 
