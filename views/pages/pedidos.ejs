@@ -107,6 +107,8 @@ let currentOrder;
 // Function to update the inventory of ONE order
 const updateOrderInventory = async () => {
 
+    console.log('CurrentOrder : ', currentOrder); 
+
     const pedido = currentOrder; 
 
     const carrito = pedido.carrito;
@@ -124,6 +126,9 @@ const updateOrderInventory = async () => {
         // Update current inventory 
         inventory[producto.Producto_idProducto] = newQuantity[producto.Producto_idProducto];
     } );
+
+    console.log('Inventory : ', inventory); 
+    console.log('NewQuantity : ', newQuantity); 
 
     // Parse newQuantity data
     let data = []; 
@@ -192,7 +197,7 @@ socket.on('pedidos', pedido => {
 
         // Update cart inventory on the order 
         currentOrder = pedido; 
-        updateOrderInventory();
+        // updateOrderInventory();
     }
 
 });
