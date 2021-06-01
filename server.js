@@ -13,7 +13,7 @@ require('./Passport.js');
 //------------------------------------------------------- 
 //configuracion de los valores staticos
 app.use(express.static(path.join(__dirname, 'public'))); 
-app.set('views', __dirname + 'views');
+app.set('views', __dirname + '/views');
 app.set('view engie', 'ejs');
 
 const PORT = process.env.PORT || 8080; // Port in which the server will be listening to requests
@@ -38,7 +38,7 @@ app.use(passport.session()); // Initialize passport session
 //---------------------------------------
 const isStoreAlreadyLoggedIn = (req, res, next) => {
     console.log(req.user); 
-    if (req.isAuthenticated()) return res.redirect(`/pedidos`); 
+    if (req.isAuthenticated()) return res.redirect('/pedidos'); 
     else return next(); 
 }; 
 
