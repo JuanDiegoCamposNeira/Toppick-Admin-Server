@@ -84,6 +84,9 @@ estructura de JSON de los pedidos
 }
 */
 
+// Active orders
+let activeOrders = {}; 
+
 // Get inventory
 let inventory = {}; 
 async function getInventory() {
@@ -105,11 +108,11 @@ socket.emit('new_Store', idPuntoDeVenta);
 
 let currentOrder; 
 // Function to update the inventory of ONE order
-const updateOrderInventory = async () => {
+const updateOrderInventory = async ( idPedido ) => {
 
-    console.log('CurrentOrder : ', currentOrder); 
 
-    const pedido = currentOrder; 
+    const pedido = activeOrders[idPedido]; 
+    console.log('CurrentOrder : ', pedido); 
 
     const carrito = pedido.carrito;
     console.log('UpdateOrder, Order: ', pedido); 
@@ -195,9 +198,9 @@ socket.on('pedidos', pedido => {
         }
         nuevoPedido(nuevoP);
 
-        // Update cart inventory on the order 
-        currentOrder = pedido; 
-        // updateOrderInventory();
+        // Add order to active orders
+        activeOrders[pedido.idPedido] = pedido; 
+
     }
 
 });
@@ -222,7 +225,11 @@ async function getOrders() {
          
         // Get data from response
         response.data.body.forEach(pedido => {
-            // updateOrderInventory(pedido); 
+            
+            // Save order into active orders
+            activeOrders[pedido.idPedido] = pedido; 
+
+            // ...
             const fechaSegundos = pedido.fechaReclamo.split("T");
             const fechaSegundos2 = fechaSegundos[1].split(".");
             let fechaReclamo = fechaSegundos2[0];
@@ -259,11 +266,8 @@ async function getOrders() {
             }
             if (pedido.estadoPedido == "Solicitado")
                 nuevoPedido(nuevoP);
-            else if (pedido.estadoPedido == "Aceptado") {
-                currentOrder = pedido;
-                updateOrderInventory();
+            else if (pedido.estadoPedido == "Aceptado") 
                 nuevoPedidoCurso(nuevoP);
-            }
             else if (pedido.estadoPedido == "Listo")
                 pedidoListo(nuevoP);
         });
@@ -284,7 +288,7 @@ async function cambiarEstadoPedido(idPedido, nuevoEstado, razonRechazo) {
 
     // If new state is Accepted
     if (nuevoEstado == 'Aceptado') {
-        updateOrderInventory(); 
+        updateOrderInventory(idPedido); 
     }
 
     // Declarar los parametros del cuerpo de la solicitud POST 
