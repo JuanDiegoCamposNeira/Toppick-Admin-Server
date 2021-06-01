@@ -67,7 +67,7 @@ app.post('/logout', async (req, res) => {
 //                  LOGIN routes
 //-------------------------------------------------------
 app.get('/', isStoreAlreadyLoggedIn, (req, res) => {
-    res.render("inicio.ejs");
+    res.render('pages/inicio.ejs');
 });
 
 app.post('/login', (req, res, next) => { 
