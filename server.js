@@ -61,22 +61,21 @@ const getDate = () => {
 app.post('/logout', async (req, res) => {
      
     // Change availavility of store in DB
-    try {
-        const url = `https://toppickapp.herokuapp.com/cierreTienda/${ req.user.id }`; 
-        console.log('LOGOUT URL:', url); 
-        const response = await axios.get( url ); 
-        console.log('LOGOUT server response:', response); 
-    } catch ( error ) {
-        console.log('ERROR:', error); 
-        // Return error redirect 
-        return res.redirect('/'); 
-    }
-    
-    // Log out from store
-    req.logout();
-    // Return successfull redirect 
-    return res.redirect('/'); 
-
+    const url = `https://toppickapp.herokuapp.com/tienda/cierreTienda/${ req.user.id }`; 
+    console.log('LOGOUT URL:', url); 
+    axios.patch( url )
+        .then( response => {
+            console.log('LOGOUT server response:', response.data); 
+             // Log out from store
+            req.logout();
+            // Return successfull redirect 
+            return res.redirect('/'); 
+        } )
+        .catch( error => {
+            console.log('ERROR:', error.data); 
+            // Return error redirect 
+            return res.redirect('/'); 
+        } ); 
 }); 
 
 //-------------------------------------------------------
@@ -101,18 +100,18 @@ app.post('/login', async (req, res, next) => {
             // No error 
             else {
                 // Change store state in DB  
-                try {
-                    const url = `https://toppickapp.herokuapp.com/AperturaTienda/${ req.user.id }`; 
-                    console.log('LOGIN URL', url); 
-                    const response = await axios.get( url ); 
-                    console.log('LOGIN server response :', response); 
-                    // Return succsessfull redirect 
-                    return res.redirect(`/pedidos`); 
-                } catch (error) {
-                    // Return error redirect
-                    return res.redirect('/'); 
-                }
-
+                const url = `https://toppickapp.herokuapp.com/tienda/AperturaTienda/${ req.user.id }`; 
+                console.log('LOGIN URL', url); 
+                axios.patch( url )
+                    .then( response => {
+                        console.log('LOGIN server response :', response.data); 
+                        // Return succsessfull redirect 
+                        return res.redirect(`/pedidos`); 
+                    } )
+                    .catch( error => {
+                        console.log('login error:', error.data); 
+                        return res.redirect('/'); 
+                    } ); 
             } 
         }); 
     }) (req, res, next); 
