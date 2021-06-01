@@ -179,7 +179,7 @@ app.get('/pedidos', isStoreLoggedIn, (req, res) => {
         idPunto :req.user.id
     }
     console.log(info.id)
-    res.render("pedidos.ejs", info);
+    res.render('pages/pedidos.ejs', info);
 });
 
 //-------------------------------------------------------
