@@ -109,7 +109,7 @@ app.get('/cierre_caja', isStoreLoggedIn, async (req,res) =>{
             mayorGanancia: productosMayorGanancia
         }; 
         // Render page with information from DB
-        res.render('cierre_caja.ejs', dataObj); 
+        res.render('pages/cierre_caja.ejs', dataObj); 
 
     } catch( error ) {
         console.log('CIERRE CAJA : Error while making request to server'); 
@@ -137,7 +137,7 @@ app.get('/historial', isStoreLoggedIn, async (req,res) =>{
             pedidos: response.data.body
         }; 
         // Render page with information from DB
-        return res.render('Historial_pedidos.ejs', dataObj); 
+        return res.render('pages/Historial_pedidos.ejs', dataObj); 
 
     } catch( error ) {
         console.log('HISTORIAL : Error while making request to server'); 
@@ -149,7 +149,7 @@ app.get('/historial', isStoreLoggedIn, async (req,res) =>{
 //              UPDATE INVENTORY routes
 //-------------------------------------------------------
 app.get('/actualizar', isStoreLoggedIn, async (req, res) => {
-    try{
+    try {
         //Get the information products
         const response = await axios({
             method: "GET",
@@ -164,8 +164,8 @@ app.get('/actualizar', isStoreLoggedIn, async (req, res) => {
             productos:response.data.body,
             id:req.user.id
         };
-        return res.render("actualizar_inventario.ejs", dataObj);
-    }catch(error){
+        return res.render("pages/actualizar_inventario.ejs", dataObj);
+    } catch(error){
         console.log('Actualizar : Error while making request to server'); 
         console.log(error); 
     }
