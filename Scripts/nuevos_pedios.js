@@ -16,6 +16,7 @@ estructura de JSON de los pedidos
     ]
 }
 */
+console.log('Nuevos pedidos llamados'); 
 
 const socket = io('https://toppickapp.herokuapp.com');
 
