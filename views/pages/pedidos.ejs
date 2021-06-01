@@ -93,9 +93,8 @@ async function getInventory() {
         response.data.body.forEach( producto => {
             inventory[producto.idProducto] = producto.inventario; 
         }); 
-        console.log(inventory); 
     } catch ( error ) {
-        console.log(error); 
+        console.log('Fill inventory, errror : ', error); 
     }
 }
 getInventory(); 
@@ -103,25 +102,20 @@ getInventory();
 const socket = io('https://toppickapp.herokuapp.com');
 
 socket.emit('new_Store', idPuntoDeVenta);
-console.log(idPuntoDeVenta);
 
 let currentOrder; 
 // Function to update the inventory of ONE order
 const updateOrderInventory = async () => {
 
-    console.log('Actualizando inventario'); 
     const pedido = currentOrder; 
 
     const carrito = pedido.carrito;
-    console.log(pedido); 
+    console.log('UpdateOrder, Order: ', pedido); 
     // Get current quantity of every product 
     let currentInventory = {}; 
-    console.log(inventory); 
     carrito.forEach( producto => {
         currentInventory[producto.Producto_idProducto] = inventory[producto.Producto_idProducto]; 
     }); 
-
-    console.log(currentInventory); 
 
     // Calculate new quantity for every product 
     newQuantity = {}; 
@@ -130,7 +124,6 @@ const updateOrderInventory = async () => {
         // Update current inventory 
         inventory[producto.Producto_idProducto] = newQuantity[producto.Producto_idProducto];
     } );
-    console.log(newQuantity); 
 
     // Parse newQuantity data
     let data = []; 
@@ -142,13 +135,12 @@ const updateOrderInventory = async () => {
     // Update quantity in DB
     try {
         const URL = `https://toppickapp.herokuapp.com/productos/inventario/${ idPuntoDeVenta }`; 
-        console.log(URL); 
         const response = await axios({
             method: 'patch', 
             url: URL,
             data: data
         }); 
-        console.log(response); 
+        console.log('UpdateInventory, response : ', response); 
     } catch (error) {
         console.log(error); 
     }
@@ -161,7 +153,7 @@ socket.on('pedidos', pedido => {
 
     //------------- Show orders in window -------------
     if (pedido.PuntoDeVenta_idPuntodeVenta == parseInt(idPuntoDeVenta)) {
-        console.log(pedido);
+        console.log('Nuevo pedido: ', pedido);
         const fechaSegundos = pedido.fechaReclamo.split("T");
         const fechaSegundos2 = fechaSegundos[1].split(".");
         let fechaReclamo = fechaSegundos2[0];
@@ -169,7 +161,6 @@ socket.on('pedidos', pedido => {
         let productosd = [];
         for (let i = 0; i < productos.length; i++) {
             const elemento = productos[i];
-            //console.log(elemento);
             let comentario = `cantidad:  ${elemento.CantidadProducto}`;
             if (elemento["Acompañamientos"]) {
                 if (elemento["Acompañamientos"].length > 0) {
@@ -177,7 +168,6 @@ socket.on('pedidos', pedido => {
                     comentario = comentario + " Adición: "
                     for (let j = 0; j < acompañamiento.length; j++) {
                         const a = acompañamiento[j];
-                        console.log(a["nombreAcompañamiento"]);
                         comentario += ` ${a["nombreAcompañamiento"]},`;
                     }
                 }
@@ -193,7 +183,6 @@ socket.on('pedidos', pedido => {
             productosd.push(p);
 
         }
-        console.log(productosd);
         let nuevoP = {
             id: pedido.idPedido,
             horaEntrega: fechaReclamo,
@@ -225,7 +214,6 @@ async function getOrders() {
             method: "GET",
             url: `https://toppickapp.herokuapp.com/pedidos/tienda/${ idPuntoDeVenta }`
         });
-        // console.log(response);
          
         // Get data from response
         response.data.body.forEach(pedido => {
@@ -233,12 +221,10 @@ async function getOrders() {
             const fechaSegundos = pedido.fechaReclamo.split("T");
             const fechaSegundos2 = fechaSegundos[1].split(".");
             let fechaReclamo = fechaSegundos2[0];
-            //console.log(fechaReclamo);
             let productos = pedido.carrito;
             let productosd = [];
             for (let i = 0; i < productos.length; i++) {
                 const elemento = productos[i];
-                //console.log(elemento);
                 let comentario = `cantidad:  ${elemento.CantidadProducto}`;
                 if (elemento["Acompañamientos"]) {
                     if (elemento["Acompañamientos"].length > 0) {
@@ -246,7 +232,6 @@ async function getOrders() {
                         comentario = comentario + " Adición: "
                         for (let j = 0; j < acompañamiento.length; j++) {
                             const a = acompañamiento[j];
-                            console.log(a["nombreAcompañamiento"]);
                             comentario += ` ${a["nombreAcompañamiento"]} `;
                         }
                     }
@@ -270,8 +255,8 @@ async function getOrders() {
             if (pedido.estadoPedido == "Solicitado")
                 nuevoPedido(nuevoP);
             else if (pedido.estadoPedido == "Aceptado") {
-                currentOrder = pedido; 
-                updateOrderInventory(); 
+                currentOrder = pedido;
+                updateOrderInventory();
                 nuevoPedidoCurso(nuevoP);
             }
             else if (pedido.estadoPedido == "Listo")
@@ -298,12 +283,11 @@ async function cambiarEstadoPedido(idPedido, nuevoEstado, razonRechazo) {
     }
 
     // Declarar los parametros del cuerpo de la solicitud POST 
-    console.log(nuevoEstado);
     const bodyParams = {
         "estadoPedido": nuevoEstado,
         "razonRechazo": razonRechazo
     };
-    console.log(bodyParams);
+
     try {
         const response = await axios({
             method: "PATCH",
@@ -311,11 +295,8 @@ async function cambiarEstadoPedido(idPedido, nuevoEstado, razonRechazo) {
             data: bodyParams
         });
     } catch (err) {
-        console.log(err);
+        console.log('CambioDeEstado: ', err);
     }
-
-    // Realizar la solicitud PATCH al servidor 
-
 
 }
 
