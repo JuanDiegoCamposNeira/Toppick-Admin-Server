@@ -13,6 +13,7 @@ require('./Passport.js');
 //------------------------------------------------------- 
 //configuracion de los valores staticos
 app.set('view engie', 'ejs');
+app.set('views', __dirname + '/views');
 app.use("/assets", express.static( path.join( __dirname, 'assets' ) ));
 app.use("/Scripts", express.static( path.join( __dirname, 'Scripts' ) ));
 app.use("/Css", express.static( path.join( __dirname, 'Css' ) ));
