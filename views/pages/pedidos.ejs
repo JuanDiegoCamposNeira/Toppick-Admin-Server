@@ -83,15 +83,82 @@ estructura de JSON de los pedidos
     ]
 }
 */
-console.log('Nuevos pedidos llamados'); 
+
+// Get inventory
+let inventory = {}; 
+async function getInventory() {
+    try {
+        const response = await axios.get(`https://toppickapp.herokuapp.com/tienda/catalogo/${idPuntoDeVenta}`)
+        // console.log(response.data.body); 
+        response.data.body.forEach( producto => {
+            inventory[producto.idProducto] = producto.inventario; 
+        }); 
+        console.log(inventory); 
+    } catch ( error ) {
+        console.log(error); 
+    }
+}
+getInventory(); 
 
 const socket = io('https://toppickapp.herokuapp.com');
-
 
 socket.emit('new_Store', idPuntoDeVenta);
 console.log(idPuntoDeVenta);
 
+// Function to update the inventory of ONE order
+const updateOrderInventory = async (pedido) => {
+
+    const carrito = pedido.carrito;
+    console.log(pedido); 
+    // Get current quantity of every product 
+    let currentInventory = {}; 
+    console.log(inventory); 
+    carrito.forEach( producto => {
+        currentInventory[producto.Producto_idProducto] = inventory[producto.Producto_idProducto]; 
+    }); 
+
+    console.log(currentInventory); 
+
+    // Calculate new quantity for every product 
+    newQuantity = {}; 
+    carrito.forEach( producto => {
+        newQuantity[producto.Producto_idProducto] = inventory[producto.Producto_idProducto] - producto.CantidadProducto; 
+        // Update current inventory 
+        inventory[producto.Producto_idProducto] = newQuantity[producto.Producto_idProducto];
+    } );
+    console.log(newQuantity); 
+
+    // Parse newQuantity data
+    let data = []; 
+    for (let obj in newQuantity) {
+        const product = { idProducto: obj, nuevaCantidad: newQuantity[obj] }; 
+        data.push(product); 
+    }
+
+    // Update quantity in DB
+    try {
+        const URL = `https://toppickapp.herokuapp.com/productos/inventario/${ idPuntoDeVenta }`; 
+        console.log(URL); 
+        const response = await axios({
+            method: 'patch', 
+            url: URL,
+            data: data
+        }); 
+        console.log(response); 
+    } catch (error) {
+        console.log(error); 
+    }
+
+}; 
+
+
+// New order received
 socket.on('pedidos', pedido => {
+
+    // Store orders that haven't yet been confirmed
+    let pedidos = []; 
+
+    //------------- Show orders in window -------------
     if (pedido.PuntoDeVenta_idPuntodeVenta == parseInt(idPuntoDeVenta)) {
         console.log(pedido);
         const fechaSegundos = pedido.fechaReclamo.split("T");
@@ -123,6 +190,9 @@ socket.on('pedidos', pedido => {
             };
 
             productosd.push(p);
+
+            // Save order
+            pedidos.push()
         }
         console.log(productosd);
         let nuevoP = {
@@ -132,8 +202,12 @@ socket.on('pedidos', pedido => {
         }
         nuevoPedido(nuevoP);
     }
-});
 
+    //------------- Change inventory of each product -------------
+    console.log('Socket', pedido); 
+    
+
+});
 
 
 var listaConfirmar = [];
@@ -141,11 +215,6 @@ var listaEnCurso = [];
 var listaListos = [];
 let unidadesDisponibles = true;
 
-/**
- * Intervalo para verificar si existen nuevos productos 
- * constantemente en la base de datos 
- */
-//setInterval(() => getOrders(), 2000);
 
 /**
  * Función que obtiene las nuevas ordenes
@@ -157,10 +226,11 @@ async function getOrders() {
             method: "GET",
             url: `https://toppickapp.herokuapp.com/pedidos/tienda/${ idPuntoDeVenta }`
         });
-        console.log(response);
+        // console.log(response);
+         
         // Get data from response
-
         response.data.body.forEach(pedido => {
+            // updateOrderInventory(pedido); 
             const fechaSegundos = pedido.fechaReclamo.split("T");
             const fechaSegundos2 = fechaSegundos[1].split(".");
             let fechaReclamo = fechaSegundos2[0];
@@ -207,6 +277,12 @@ async function getOrders() {
         });
 
         // Create object that will be passed to the view       
+
+
+        // Update inventory debug 
+        updateOrderInventory({ carrito: [ {Producto_idProducto: 7, CantidadProducto: 2}, {Producto_idProducto: 8, CantidadProducto: 3} ] }); 
+
+
 
     } catch (error) {
         console.log(error);
