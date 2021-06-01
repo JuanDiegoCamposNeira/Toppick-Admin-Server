@@ -105,8 +105,12 @@ const socket = io('https://toppickapp.herokuapp.com');
 socket.emit('new_Store', idPuntoDeVenta);
 console.log(idPuntoDeVenta);
 
+let currentOrder; 
 // Function to update the inventory of ONE order
-const updateOrderInventory = async (pedido) => {
+const updateOrderInventory = async () => {
+
+    console.log('Actualizando inventario'); 
+    const pedido = currentOrder; 
 
     const carrito = pedido.carrito;
     console.log(pedido); 
@@ -155,9 +159,6 @@ const updateOrderInventory = async (pedido) => {
 // New order received
 socket.on('pedidos', pedido => {
 
-    // Store orders that haven't yet been confirmed
-    let pedidos = []; 
-
     //------------- Show orders in window -------------
     if (pedido.PuntoDeVenta_idPuntodeVenta == parseInt(idPuntoDeVenta)) {
         console.log(pedido);
@@ -191,8 +192,6 @@ socket.on('pedidos', pedido => {
 
             productosd.push(p);
 
-            // Save order
-            pedidos.push()
         }
         console.log(productosd);
         let nuevoP = {
@@ -201,11 +200,11 @@ socket.on('pedidos', pedido => {
             productos: productosd
         }
         nuevoPedido(nuevoP);
-    }
 
-    //------------- Change inventory of each product -------------
-    console.log('Socket', pedido); 
-    
+        // Update cart inventory on the order 
+        currentOrder = pedido; 
+        updateOrderInventory();
+    }
 
 });
 
@@ -270,19 +269,14 @@ async function getOrders() {
             }
             if (pedido.estadoPedido == "Solicitado")
                 nuevoPedido(nuevoP);
-            else if (pedido.estadoPedido == "Aceptado")
+            else if (pedido.estadoPedido == "Aceptado") {
+                currentOrder = pedido; 
+                updateOrderInventory(); 
                 nuevoPedidoCurso(nuevoP);
+            }
             else if (pedido.estadoPedido == "Listo")
                 pedidoListo(nuevoP);
         });
-
-        // Create object that will be passed to the view       
-
-
-        // Update inventory debug 
-        updateOrderInventory({ carrito: [ {Producto_idProducto: 7, CantidadProducto: 2}, {Producto_idProducto: 8, CantidadProducto: 3} ] }); 
-
-
 
     } catch (error) {
         console.log(error);
@@ -297,6 +291,12 @@ getOrders();
  * y si no recibe los parámetros, los asigna por defecto 
  */
 async function cambiarEstadoPedido(idPedido, nuevoEstado, razonRechazo) {
+
+    // If new state is Accepted
+    if (nuevoEstado == 'Aceptado') {
+        updateOrderInventory(); 
+    }
+
     // Declarar los parametros del cuerpo de la solicitud POST 
     console.log(nuevoEstado);
     const bodyParams = {
@@ -318,9 +318,6 @@ async function cambiarEstadoPedido(idPedido, nuevoEstado, razonRechazo) {
 
 
 }
-// Se prueba la petición con los siguientes parámetros 
-// cambiarEstadoPedido(2, 1, 'Nuevooo');  ----> Funciona 
-// cambiarEstadoPedido(1, 1, 'Rech', 'No se cuentan con los alimentos suficientes');   ------> Funciona
 
 
 /**
@@ -527,7 +524,9 @@ function plantilla_nuevo_producto(p) {
         nuevoPedidoCurso(p);
         removeAllChildNodes(divPedido);
         divPedido.remove(divPedido);
+
         cambiarEstadoPedido(idPedido = p.id, nuevoEstado = "Aceptado", razonRechazo = "");
+        
         /* generar codigo para la notifiacion */
     });
 
