@@ -1,3 +1,7 @@
+.navbar ul {
+  display: ;
+}
+
 .BotonHeader{
     font-size: 1.8rem;
     padding: 10px;
@@ -10,6 +14,7 @@
     font-family: "Lato", sans-serif;
     width: 192px;
     background-color:#d77d4f;
+    text-decoration: none;
   }
   .BotonHeader:hover{
     background-color:#b4501e;

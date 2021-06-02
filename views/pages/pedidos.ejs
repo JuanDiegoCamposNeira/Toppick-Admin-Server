@@ -169,7 +169,7 @@ socket.on('pedidos', pedido => {
         let productosd = [];
         for (let i = 0; i < productos.length; i++) {
             const elemento = productos[i];
-            let comentario = `cantidad:  ${elemento.CantidadProducto}`;
+            let comentario = `cantidad:  ${elemento.CantidadProducto} \n`;
             if (elemento["Acompañamientos"]) {
                 if (elemento["Acompañamientos"].length > 0) {
                     const acompañamiento = elemento["Acompañamientos"];
@@ -428,7 +428,7 @@ function formRechazar(papa, divPedido, p) {
     o.innerHTML = "No hay venta en esta hora";
     select.appendChild(o);
     o = document.createElement("option");
-    o.innerHTML = "Poca caliridad en los detalles";
+    o.innerHTML = "Poca claridad en los detalles";
     select.appendChild(o)
     form.appendChild(select);
     form.appendChild(document.createElement("br"));
